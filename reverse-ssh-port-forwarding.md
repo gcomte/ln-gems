@@ -85,8 +85,11 @@ autossh -M 0 -f -N -R 28333:127.0.0.1:28333 cj
 ``` 
 
 Explanation:
+
 `-M 0` means *no monitoring*
+
 `-f` means *run in background*
+
 `-N` means *don't execute anything on the server*
 
 #### Make sure the file is executable
@@ -95,6 +98,7 @@ Run the follwing command (on your full node device):
 sudo chmod +x /home/admin/reverseSSH.sh
 ```
 **Caution**
+
 If you use a RaspiBlitz as your full node like I do, be aware that the external HDD is mounted in a way that does not allow anything to be executed directly from the HDD. So make sure that you store this file somewhere on SD card (but also be aware that the next time you flash your SD card this script will be cleared too).
 
 #### Run autossh at startup
