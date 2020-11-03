@@ -13,6 +13,8 @@ So open a few large channels, and simply wait a few weeks.
 ## 2. Purchase things or simulate purchasing things with on-chain payouts.
 
 If you open a channel, and spend 50% of the channel capacity on something, perhaps even sending back to your own wallet via a service like
+* https://chainmarket.etleneum.com/
+* https://fixedfloat.com/en/
 * https://zigzag.io
 * https://www.coinplaza.it
 * https://lightningconductor.net/invoice
@@ -82,8 +84,8 @@ The service can be used in various situations:
 
 ### Market places
 
-[Pool](https://lightning.engineering/pool/) is a non-custodial, peer-to-peer marketplace for Lightning node operators to buy and sell channels.
-[Microlancer](https://microlancer.io) has some offerings for opening channels
+* [Pool](https://lightning.engineering/pool/) is a non-custodial, peer-to-peer marketplace for Lightning node operators to buy and sell channels.
+* [Microlancer](https://microlancer.io/) has some offerings for opening channels
 
 #### 3rd party examples
 
