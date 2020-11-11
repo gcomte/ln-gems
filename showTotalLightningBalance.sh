@@ -6,6 +6,8 @@
 
 YELLOW=`tput setaf 3`
 RESET=`tput sgr0`
+GREEN=`tput setaf 2`
+RED=`tput setaf 1`
 
 ##############################################################################
 # CALCULATIONS
@@ -52,6 +54,9 @@ CONTROL_SUM=$((\
   + LN_PAYMENTS_FEES
   - LN_EARNED_FEES_IN_SATS
 ))
+
+PROFIT_AND_LOSS=$((LN_EARNED_FEES_IN_SATS - ONCHAIN_TX_FEES))
+LN_SPEND=$((LN_PAYMENTS + LN_PAYMENTS_FEES))
 
 ##############################################################################
 # Sats to BTC 
@@ -113,17 +118,30 @@ echo -e "$ONCHAIN_FUNDS_CONFIRMED_PERCENTAGE%\t\t$ONCHAIN_FUNDS_UNCONFIRMED_PERC
 echo -e "\n${YELLOW}OWNED BALANCE [LN + ON-CHAIN]${RESET}"
 echo -e "$TOTAL_BALANCE sats | $TOTAL_BALANCE_BTC BTC\n"
 
+
+
+
+echo -e "---------------------------------------------"
 echo -e "ON-CHAIN CONFIRMED           $(printf %10s $ONCHAIN_FUNDS_CONFIRMED) sats"
 echo -e "ON-CHAIN UNCONFIRMED         $(printf %10s $ONCHAIN_FUNDS_UNCONFIRMED) sats"
-echo -e "ON-CHAIN FEES                $(printf %10s "$ONCHAIN_TX_FEES") sats"
+echo -e "ON-CHAIN FEES                ${RED}$(printf %10s "-$ONCHAIN_TX_FEES")${RESET} sats"
 echo -e "---------------------------------------------"
 echo -e "LN LOCAL BALANCE             $(printf %10s $LN_LOCAL_BALANCE) sats"
 echo -e "LN LOCKED IN COMMIT FEES     $(printf %10s $LN_COMMIT_FEES) sats"
 echo -e "LN INVOICES (RECEIVED)       $(printf %10s $LN_INVOICES) sats"
-echo -e "LN PAYMENTS (PAID)           $(printf %10s $LN_PAYMENTS) sats"
-echo -e "LN PAYMENTS FEES             $(printf %10s $LN_PAYMENTS_FEES) sats"
-echo -e "LN EARNED (FORWARD) FEES     $(printf %10s $LN_EARNED_FEES_IN_SATS) sats"
+echo -e "LN PAYMENTS (PAID)           $(printf %10s "-$LN_PAYMENTS") sats"
+echo -e "LN PAYMENTS FEES             $(printf %10s "-$LN_PAYMENTS_FEES") sats"
+echo -e "LN EARNED (FORWARD) FEES     ${GREEN}$(printf %10s $LN_EARNED_FEES_IN_SATS)${RESET} sats"
 echo -e "---------------------------------------------"
 
-echo -e "${YELLOW}CONTROL SUM${RESET}                     ${CONTROL_SUM} sats\n"
+if [ $PROFIT_AND_LOSS -gt 0 ]; then
+  COLORED_PNL=${GREEN}$(printf %10s "$PROFIT_AND_LOSS")${RESET}
+else
+  COLORED_PNL=${RED}$(printf %10s "$PROFIT_AND_LOSS")${RESET}
+fi
 
+echo -e "${YELLOW}PROFIT AND LOSS${RESET}              $COLORED_PNL sats"
+echo -e "---------------------------------------------"
+echo -e "CONTROL SUM                  $(printf %10s $CONTROL_SUM) sats"
+echo -e "LN SPEND                     $(printf %10s $LN_SPEND) sats"
+echo -e ""
