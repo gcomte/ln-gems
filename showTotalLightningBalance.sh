@@ -23,28 +23,37 @@ ONCHAIN_FUNDS_CONFIRMED=$(lncli walletbalance | jq -r '.confirmed_balance')
 ONCHAIN_FUNDS_UNCONFIRMED=$(lncli walletbalance | jq -r '.unconfirmed_balance')
 ONCHAIN_FUNDS_TOTAL=$(lncli walletbalance | jq -r '.total_balance')
 
-ONCHAIN_FUNDS_CONFIRMED_BTC=$(printf %.3f\\n "$(($ONCHAIN_FUNDS_CONFIRMED))e-8")
-ONCHAIN_FUNDS_UNCONFIRMED_BTC=$(printf %.3f\\n "$(($ONCHAIN_FUNDS_UNCONFIRMED))e-8")
-ONCHAIN_FUNDS_TOTAL_BTC=$(printf %.3f\\n "$(($ONCHAIN_FUNDS_TOTAL))e-8")
 
-LN_LOCAL_BALANCE_PERCENTAGE=$((100 * $LN_LOCAL_BALANCE / $LN_TOTAL_BALANCE))
-LN_REMOTE_BALANCE_PERCENTAGE=$((100 * $LN_REMOTE_BALANCE / $LN_TOTAL_BALANCE))
+ONCHAIN_FUNDS_CONFIRMED_BTC=$(printf %.3f\\n "$((ONCHAIN_FUNDS_CONFIRMED))e-8")
+ONCHAIN_FUNDS_UNCONFIRMED_BTC=$(printf %.3f\\n "$((ONCHAIN_FUNDS_UNCONFIRMED))e-8")
+ONCHAIN_FUNDS_TOTAL_BTC=$(printf %.3f\\n "$((ONCHAIN_FUNDS_TOTAL))e-8")
+ONCHAIN_TX=$(lncli listchaintxns | jq -r '.transactions[] | .amount' | awk '{s+=$1} END {print s}')
+ONCHAIN_TX_FEES=$(lncli listchaintxns | jq -r '.transactions[] | .total_fees' | awk '{s+=$1} END {print s}')
+
+LN_LOCAL_BALANCE_PERCENTAGE=$((100 * LN_LOCAL_BALANCE / LN_TOTAL_BALANCE))
+LN_REMOTE_BALANCE_PERCENTAGE=$((100 * LN_REMOTE_BALANCE / LN_TOTAL_BALANCE))
 TOTAL_BALANCE_PERCENTAGE=100
 
-ONCHAIN_FUNDS_CONFIRMED_PERCENTAGE=$((100 * $ONCHAIN_FUNDS_CONFIRMED / $ONCHAIN_FUNDS_TOTAL))
-ONCHAIN_FUNDS_UNCONFIRMED_PERCENTAGE=$((100 * $ONCHAIN_FUNDS_UNCONFIRMED / $ONCHAIN_FUNDS_TOTAL))
+ONCHAIN_FUNDS_CONFIRMED_PERCENTAGE=$((100 * ONCHAIN_FUNDS_CONFIRMED / ONCHAIN_FUNDS_TOTAL))
+ONCHAIN_FUNDS_UNCONFIRMED_PERCENTAGE=$((100 * ONCHAIN_FUNDS_UNCONFIRMED / ONCHAIN_FUNDS_TOTAL))
 
-TOTAL_BALANCE=$((LN_LOCAL_BALANCE + ONCHAIN_FUNDS_TOTAL))
-LN_IN_AND_OUT=$((LN_INVOICES + LN_PAYMENTS + LN_PAYMENTS_FEES))
+TOTAL_BALANCE=$((ONCHAIN_FUNDS_TOTAL + LN_LOCAL_BALANCE))
 
-# This should be amount of funds put into cleared of paid/recieved LN payments
-CONTROL_SUM=$((TOTAL_BALANCE + LN_COMMIT_FEES - LN_IN_AND_OUT))
+CONTROL_SUM=$((\
+  ONCHAIN_FUNDS_CONFIRMED\
+  + ONCHAIN_FUNDS_UNCONFIRMED\
+  + ONCHAIN_TX_FEES
+  + LN_LOCAL_BALANCE\
+  + LN_COMMIT_FEES\
+  - LN_INVOICES\
+  + LN_PAYMENTS\
+  + LN_PAYMENTS_FEES
+))
 
 ##############################################################################
 # Sats to BTC 
 ##############################################################################
 
-CONTROL_SUM_BTC=$(printf %.3f\\n "$(($CONTROL_SUM))e-8")
 TOTAL_BALANCE_BTC=$(printf %.3f\\n "$(($TOTAL_BALANCE))e-8")
 LN_LOCAL_BALANCE_BTC=$(printf %.3f\\n "$(($LN_LOCAL_BALANCE))e-8")
 LN_REMOTE_BALANCE_BTC=$(printf %.3f\\n "$(($LN_REMOTE_BALANCE))e-8")
@@ -101,10 +110,16 @@ echo -e "$ONCHAIN_FUNDS_CONFIRMED_PERCENTAGE%\t\t$ONCHAIN_FUNDS_UNCONFIRMED_PERC
 echo -e "\n${YELLOW}OWNED BALANCE [LN + ON-CHAIN]${RESET}"
 echo -e "$TOTAL_BALANCE sats | $TOTAL_BALANCE_BTC BTC\n"
 
+echo -e "ON-CHAIN CONFIRMED           $(printf %10s $ONCHAIN_FUNDS_CONFIRMED) sats"
+echo -e "ON-CHAIN UNCONFIRMED         $(printf %10s $ONCHAIN_FUNDS_UNCONFIRMED) sats"
+echo -e "ON-CHAIN FEES                $(printf %10s "$ONCHAIN_TX_FEES") sats"
+echo -e "---------------------------------------------"
+echo -e "LN LOCAL BALANCE             $(printf %10s $LN_LOCAL_BALANCE) sats"
+echo -e "LN LOCKED IN COMMIT FEES     $(printf %10s $LN_COMMIT_FEES) sats"
+echo -e "LN INVOICES (RECEIVED)       $(printf %10s $LN_INVOICES) sats"
+echo -e "LN PAYMENTS (PAID)           $(printf %10s $LN_PAYMENTS) sats"
+echo -e "LN PAYMENTS FEES             $(printf %10s $LN_PAYMENTS_FEES) sats"
+echo -e "---------------------------------------------"
 
-echo -e "${YELLOW}LOCKED IN COMMIT FEES${RESET}\n$LN_COMMIT_FEES sats | $LN_COMMIT_FEES_BTC BTC\n"
-echo -e "${YELLOW}INVOICES RECIEVED${RESET}\n$LN_INVOICES sats | $LN_INVOICES_BTC BTC\n"
-echo -e "${YELLOW}PAYMENTS PAID (FEES)${RESET}\n$LN_PAYMENTS ($LN_PAYMENTS_FEES) sats | $LN_PAYMENTS_BTC ($LN_PAYMENTS_FEES_BTC) BTC\n"
+echo -e "${YELLOW}CONTROL SUM${RESET}                     ${CONTROL_SUM} sats\n"
 
-echo -e "${YELLOW}CONTROL SUM${RESET}"
-echo -e "${CONTROL_SUM} sats | ${CONTROL_SUM_BTC} BTC\n"
