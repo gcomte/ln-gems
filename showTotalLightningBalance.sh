@@ -18,6 +18,8 @@ LN_COMMIT_FEES=$(lncli listchannels | jq -r '.[][] | select(.initiator==true) | 
 LN_INVOICES=$(lncli listinvoices | jq -r '.invoices[] | select(.settled==true) | .value' | awk '{s+=$1} END {print s}')
 LN_PAYMENTS=$(lncli listpayments | jq -r '.payments[] | select(.status=="SUCCEEDED") | .value' | awk '{s+=$1} END {print s}')
 LN_PAYMENTS_FEES=$(lncli listpayments | jq -r '.payments[] | select(.status=="SUCCEEDED") | .fee' | awk '{s+=$1} END {print s}')
+LN_EARNED_FEES_IN_MSATS=$(lncli fwdinghistory 0 | jq -r '.forwarding_events[] | .fee_msat' | awk '{s+=$1} END {print s}')
+LN_EARNED_FEES_IN_SATS=$((LN_EARNED_FEES_IN_MSATS / 1000))
 
 ONCHAIN_FUNDS_CONFIRMED=$(lncli walletbalance | jq -r '.confirmed_balance')
 ONCHAIN_FUNDS_UNCONFIRMED=$(lncli walletbalance | jq -r '.unconfirmed_balance')
@@ -48,6 +50,7 @@ CONTROL_SUM=$((\
   - LN_INVOICES\
   + LN_PAYMENTS\
   + LN_PAYMENTS_FEES
+  - LN_EARNED_FEES_IN_SATS
 ))
 
 ##############################################################################
@@ -119,6 +122,7 @@ echo -e "LN LOCKED IN COMMIT FEES     $(printf %10s $LN_COMMIT_FEES) sats"
 echo -e "LN INVOICES (RECEIVED)       $(printf %10s $LN_INVOICES) sats"
 echo -e "LN PAYMENTS (PAID)           $(printf %10s $LN_PAYMENTS) sats"
 echo -e "LN PAYMENTS FEES             $(printf %10s $LN_PAYMENTS_FEES) sats"
+echo -e "LN EARNED (FORWARD) FEES     $(printf %10s $LN_EARNED_FEES_IN_SATS) sats"
 echo -e "---------------------------------------------"
 
 echo -e "${YELLOW}CONTROL SUM${RESET}                     ${CONTROL_SUM} sats\n"
