@@ -5,9 +5,10 @@
 ##############################################################################
 
 YELLOW=`tput setaf 3`
-RESET=`tput sgr0`
+CYAN=`tput setaf 6`
 GREEN=`tput setaf 2`
 RED=`tput setaf 1`
+RESET=`tput sgr0`
 
 ##############################################################################
 # CALCULATIONS
@@ -89,7 +90,7 @@ echo -e "$(printf %11s "$TOTAL_BALANCE") sats"
 echo -e "$(printf %11s "$TOTAL_BALANCE_BTC") BTC"
 echo -e ""
 
-echo -e "\n${YELLOW}AUDIT${RESET}\e[0;36m*\e[0m"
+echo -e "\n${YELLOW}AUDIT${CYAN}*${RESET}"
 echo -e "---------------------------------------------"
 echo -e "ON-CHAIN CONFIRMED           $(printf %10s "$ONCHAIN_FUNDS_CONFIRMED") sats"
 echo -e "ON-CHAIN UNCONFIRMED         $(printf %10s "$ONCHAIN_FUNDS_UNCONFIRMED") sats"
@@ -111,11 +112,11 @@ fi
 
 echo -e "${YELLOW}PROFIT AND LOSS${RESET}              $COLORED_PNL sats"
 echo -e "---------------------------------------------"
-echo -e "CONTROL SUM\e[0;36m**\e[0m                $(printf %10s $CONTROL_SUM) sats"
+echo -e "CONTROL SUM${CYAN}**${RESET}                $(printf %10s $CONTROL_SUM) sats"
 echo -e "LN SPEND                     $(printf %10s $LN_SPEND) sats"
 echo -e ""
-echo -e "\e[0;36m * Pending channels are ignored.\e[0m"
-echo -e "\e[0;36m** CONTROL SUM is supposed to match amount"
+echo -e "${CYAN} * Pending channels are ignored.${RESET}"
+echo -e "${CYAN}** CONTROL SUM is supposed to match amount"
 echo -e "   of funds that had been put onto this node"
-echo -e "   (can be off few sats due rounding).\e[0m"
+echo -e "   (can be off few sats due rounding).\e${RESET}"
 echo -e ""
