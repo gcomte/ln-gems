@@ -28,10 +28,9 @@ ONCHAIN_FUNDS_UNCONFIRMED=$(lncli walletbalance | jq -r '.unconfirmed_balance')
 ONCHAIN_FUNDS_TOTAL=$(lncli walletbalance | jq -r '.total_balance')
 
 
-ONCHAIN_FUNDS_CONFIRMED_BTC=$(printf %.3f\\n "$((ONCHAIN_FUNDS_CONFIRMED))e-8")
-ONCHAIN_FUNDS_UNCONFIRMED_BTC=$(printf %.3f\\n "$((ONCHAIN_FUNDS_UNCONFIRMED))e-8")
-ONCHAIN_FUNDS_TOTAL_BTC=$(printf %.3f\\n "$((ONCHAIN_FUNDS_TOTAL))e-8")
-ONCHAIN_TX=$(lncli listchaintxns | jq -r '.transactions[] | .amount' | awk '{s+=$1} END {print s}')
+ONCHAIN_FUNDS_CONFIRMED_BTC=$(printf %.8f\\n "$((ONCHAIN_FUNDS_CONFIRMED))e-8")
+ONCHAIN_FUNDS_UNCONFIRMED_BTC=$(printf %.8f\\n "$((ONCHAIN_FUNDS_UNCONFIRMED))e-8")
+ONCHAIN_FUNDS_TOTAL_BTC=$(printf %.8f\\n "$((ONCHAIN_FUNDS_TOTAL))e-8")
 ONCHAIN_TX_FEES=$(lncli listchaintxns | jq -r '.transactions[] | .total_fees' | awk '{s+=$1} END {print s}')
 
 LN_LOCAL_BALANCE_PERCENTAGE=$((100 * LN_LOCAL_BALANCE / LN_TOTAL_BALANCE))
@@ -59,76 +58,46 @@ PROFIT_AND_LOSS=$((LN_EARNED_FEES_IN_SATS - ONCHAIN_TX_FEES))
 LN_SPEND=$((LN_PAYMENTS + LN_PAYMENTS_FEES))
 
 ##############################################################################
-# Sats to BTC 
+# Sats to BTC
 ##############################################################################
 
-TOTAL_BALANCE_BTC=$(printf %.3f\\n "$(($TOTAL_BALANCE))e-8")
-LN_LOCAL_BALANCE_BTC=$(printf %.3f\\n "$(($LN_LOCAL_BALANCE))e-8")
-LN_REMOTE_BALANCE_BTC=$(printf %.3f\\n "$(($LN_REMOTE_BALANCE))e-8")
-LN_TOTAL_BALANCE_BTC=$(printf %.3f\\n "$(($LN_TOTAL_BALANCE))e-8")
-LN_INVOICES_BTC=$(printf %.3f\\n "$(($LN_INVOICES))e-8")
-LN_COMMIT_FEES_BTC=$(printf %.3f\\n "$(($LN_COMMIT_FEES))e-8")
-LN_PAYMENTS_BTC=$(printf %.3f\\n "$(($LN_PAYMENTS))e-8")
-LN_PAYMENTS_FEES_BTC=$(printf %.3f\\n "$(($LN_PAYMENTS_FEES))e-8")
+TOTAL_BALANCE_BTC=$(printf %.8f\\n "$((TOTAL_BALANCE))e-8")
+LN_LOCAL_BALANCE_BTC=$(printf %.8f\\n "$((LN_LOCAL_BALANCE))e-8")
+LN_REMOTE_BALANCE_BTC=$(printf %.8f\\n "$((LN_REMOTE_BALANCE))e-8")
+LN_TOTAL_BALANCE_BTC=$(printf %.8f\\n "$((LN_TOTAL_BALANCE))e-8")
 
 ##############################################################################
-# PRINT 
+# PRINT
 ##############################################################################
-
-# turn '0 sats' into '0.000 sats' to keep table nicely formatted
-if [ $LN_LOCAL_BALANCE -eq 0 ]; then
-    LN_LOCAL_BALANCE="0.000"
-fi
-if [ $LN_REMOTE_BALANCE -eq 0 ]; then
-    LN_REMOTE_BALANCE="0.000"
-fi
-if [ $LN_COMMIT_FEES -eq 0 ]; then
-    LN_COMMIT_FEES="0.000"
-fi
-if [ $LN_INVOICES -eq 0 ]; then
-    LN_INVOICES="0.000"
-fi
-if [ $LN_PAYMENTS -eq 0 ]; then
-    LN_PAYMENTS="0.000"
-fi
-if [ $LN_PAYMENTS_FEES -eq 0 ]; then
-    LN_PAYMENTS_FEES="0.000"
-fi
-if [ $ONCHAIN_FUNDS_CONFIRMED -eq 0 ]; then
-    ONCHAIN_FUNDS_CONFIRMED="0.000"
-fi
-if [ $ONCHAIN_FUNDS_UNCONFIRMED -eq 0 ]; then
-    ONCHAIN_FUNDS_UNCONFIRMED="0.000"
-fi
 
 echo -e "\n${YELLOW}LN BALANCE${RESET}"
-echo -e "LOCAL\t\tREMOTE\t\tTOTAL"
-echo -e "--------------\t---------------\t---------------"
-echo -e "$LN_LOCAL_BALANCE sats\t$LN_REMOTE_BALANCE sats\t$LN_TOTAL_BALANCE sats"
-echo -e "$LN_LOCAL_BALANCE_BTC BTC\t$LN_REMOTE_BALANCE_BTC BTC\t$LN_TOTAL_BALANCE_BTC BTC"
-echo -e "$LN_LOCAL_BALANCE_PERCENTAGE%\t\t$LN_REMOTE_BALANCE_PERCENTAGE%\t\t$TOTAL_BALANCE_PERCENTAGE%"
+echo -e "LOCAL             REMOTE            TOTAL           "
+echo -e "----------------  ----------------  ----------------"
+echo -e "$(printf %11s "$LN_LOCAL_BALANCE") sats  $(printf %11s "$LN_REMOTE_BALANCE") sats  $(printf %11s $LN_TOTAL_BALANCE) sats"
+echo -e "$(printf %11s "$LN_LOCAL_BALANCE_BTC") BTC   $(printf %11s "$LN_REMOTE_BALANCE_BTC") BTC   $(printf %11s "$LN_TOTAL_BALANCE_BTC") BTC"
+echo -e "$(printf %11s $LN_LOCAL_BALANCE_PERCENTAGE) %     $(printf %11s $LN_REMOTE_BALANCE_PERCENTAGE) %     $(printf %11s $TOTAL_BALANCE_PERCENTAGE) %"
 
 echo -e "\n${YELLOW}ON-CHAIN BALANCE${RESET}"
-echo -e "CONFIRMED\tUNCONFIRMED\tTOTAL"
-echo -e "--------------\t---------------\t---------------"
-echo -e "$ONCHAIN_FUNDS_CONFIRMED sats\t$ONCHAIN_FUNDS_UNCONFIRMED sats\t$ONCHAIN_FUNDS_TOTAL sats"
-echo -e "$ONCHAIN_FUNDS_CONFIRMED_BTC BTC\t$ONCHAIN_FUNDS_UNCONFIRMED_BTC BTC\t$ONCHAIN_FUNDS_TOTAL_BTC BTC"
-echo -e "$ONCHAIN_FUNDS_CONFIRMED_PERCENTAGE%\t\t$ONCHAIN_FUNDS_UNCONFIRMED_PERCENTAGE%\t\t$TOTAL_BALANCE_PERCENTAGE%"
+echo -e "CONFIRMED         UNCONFIRMED       TOTAL           "
+echo -e "----------------  ----------------  ----------------"
+echo -e "$(printf %11s "$ONCHAIN_FUNDS_CONFIRMED") sats  $(printf %11s "$ONCHAIN_FUNDS_UNCONFIRMED") sats  $(printf %11s "$ONCHAIN_FUNDS_TOTAL") sats"
+echo -e "$(printf %11s "$ONCHAIN_FUNDS_CONFIRMED_BTC") BTC   $(printf %11s "$ONCHAIN_FUNDS_UNCONFIRMED_BTC") BTC   $(printf %11s "$ONCHAIN_FUNDS_TOTAL_BTC") BTC"
+echo -e "$(printf %11s $ONCHAIN_FUNDS_CONFIRMED_PERCENTAGE) %     $(printf %11s $ONCHAIN_FUNDS_UNCONFIRMED_PERCENTAGE) %     $(printf %11s $TOTAL_BALANCE_PERCENTAGE) %"
 
 echo -e "\n${YELLOW}OWNED BALANCE [LN + ON-CHAIN]${RESET}"
-echo -e "$TOTAL_BALANCE sats | $TOTAL_BALANCE_BTC BTC\n"
+echo -e "$(printf %11s "$TOTAL_BALANCE") sats"
+echo -e "$(printf %11s "$TOTAL_BALANCE_BTC") BTC"
+echo -e ""
 
-
-
-
+echo -e "\n${YELLOW}AUDIT${RESET}\e[0;36m*\e[0m"
 echo -e "---------------------------------------------"
-echo -e "ON-CHAIN CONFIRMED           $(printf %10s $ONCHAIN_FUNDS_CONFIRMED) sats"
-echo -e "ON-CHAIN UNCONFIRMED         $(printf %10s $ONCHAIN_FUNDS_UNCONFIRMED) sats"
+echo -e "ON-CHAIN CONFIRMED           $(printf %10s "$ONCHAIN_FUNDS_CONFIRMED") sats"
+echo -e "ON-CHAIN UNCONFIRMED         $(printf %10s "$ONCHAIN_FUNDS_UNCONFIRMED") sats"
 echo -e "ON-CHAIN FEES                ${RED}$(printf %10s "-$ONCHAIN_TX_FEES")${RESET} sats"
 echo -e "---------------------------------------------"
-echo -e "LN LOCAL BALANCE             $(printf %10s $LN_LOCAL_BALANCE) sats"
-echo -e "LN LOCKED IN COMMIT FEES     $(printf %10s $LN_COMMIT_FEES) sats"
-echo -e "LN INVOICES (RECEIVED)       $(printf %10s $LN_INVOICES) sats"
+echo -e "LN LOCAL BALANCE             $(printf %10s "$LN_LOCAL_BALANCE") sats"
+echo -e "LN LOCKED IN COMMIT FEES     $(printf %10s "$LN_COMMIT_FEES") sats"
+echo -e "LN INVOICES (RECEIVED)       $(printf %10s "$LN_INVOICES") sats"
 echo -e "LN PAYMENTS (PAID)           $(printf %10s "-$LN_PAYMENTS") sats"
 echo -e "LN PAYMENTS FEES             $(printf %10s "-$LN_PAYMENTS_FEES") sats"
 echo -e "LN EARNED (FORWARD) FEES     ${GREEN}$(printf %10s $LN_EARNED_FEES_IN_SATS)${RESET} sats"
@@ -142,6 +111,11 @@ fi
 
 echo -e "${YELLOW}PROFIT AND LOSS${RESET}              $COLORED_PNL sats"
 echo -e "---------------------------------------------"
-echo -e "CONTROL SUM                  $(printf %10s $CONTROL_SUM) sats"
+echo -e "CONTROL SUM\e[0;36m**\e[0m                $(printf %10s $CONTROL_SUM) sats"
 echo -e "LN SPEND                     $(printf %10s $LN_SPEND) sats"
+echo -e ""
+echo -e "\e[0;36m * Pending channels are ignored.\e[0m"
+echo -e "\e[0;36m** CONTROL SUM is supposed to match amount"
+echo -e "   of funds that had been put onto this node"
+echo -e "   (can be off few sats due rounding).\e[0m"
 echo -e ""
