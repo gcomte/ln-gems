@@ -28,18 +28,22 @@ ONCHAIN_FUNDS_CONFIRMED=$(lncli walletbalance | jq -r '.confirmed_balance')
 ONCHAIN_FUNDS_UNCONFIRMED=$(lncli walletbalance | jq -r '.unconfirmed_balance')
 ONCHAIN_FUNDS_TOTAL=$(lncli walletbalance | jq -r '.total_balance')
 
-
 ONCHAIN_FUNDS_CONFIRMED_BTC=$(printf %.8f\\n "$((ONCHAIN_FUNDS_CONFIRMED))e-8")
 ONCHAIN_FUNDS_UNCONFIRMED_BTC=$(printf %.8f\\n "$((ONCHAIN_FUNDS_UNCONFIRMED))e-8")
 ONCHAIN_FUNDS_TOTAL_BTC=$(printf %.8f\\n "$((ONCHAIN_FUNDS_TOTAL))e-8")
 ONCHAIN_TX_FEES=$(lncli listchaintxns | jq -r '.transactions[] | .total_fees' | awk '{s+=$1} END {print s}')
 
-LN_LOCAL_BALANCE_PERCENTAGE=$((100 * LN_LOCAL_BALANCE / LN_TOTAL_BALANCE))
-LN_REMOTE_BALANCE_PERCENTAGE=$((100 * LN_REMOTE_BALANCE / LN_TOTAL_BALANCE))
 TOTAL_BALANCE_PERCENTAGE=100
 
-ONCHAIN_FUNDS_CONFIRMED_PERCENTAGE=$((100 * ONCHAIN_FUNDS_CONFIRMED / ONCHAIN_FUNDS_TOTAL))
-ONCHAIN_FUNDS_UNCONFIRMED_PERCENTAGE=$((100 * ONCHAIN_FUNDS_UNCONFIRMED / ONCHAIN_FUNDS_TOTAL))
+if [ $LN_TOTAL_BALANCE -ne 0 ]; then # prevent division by zero error
+    LN_LOCAL_BALANCE_PERCENTAGE=$((100 * LN_LOCAL_BALANCE / LN_TOTAL_BALANCE))
+    LN_REMOTE_BALANCE_PERCENTAGE=$((100 * LN_REMOTE_BALANCE / LN_TOTAL_BALANCE))
+fi
+
+if [ $ONCHAIN_FUNDS_TOTAL -ne 0 ]; then # prevent division by zero error
+    ONCHAIN_FUNDS_CONFIRMED_PERCENTAGE=$((100 * ONCHAIN_FUNDS_CONFIRMED / ONCHAIN_FUNDS_TOTAL))
+    ONCHAIN_FUNDS_UNCONFIRMED_PERCENTAGE=$((100 * ONCHAIN_FUNDS_UNCONFIRMED / ONCHAIN_FUNDS_TOTAL))
+fi
 
 TOTAL_BALANCE=$((ONCHAIN_FUNDS_TOTAL + LN_LOCAL_BALANCE))
 
@@ -75,15 +79,19 @@ echo -e "\n${YELLOW}LN BALANCE${RESET}"
 echo -e "LOCAL             REMOTE            TOTAL           "
 echo -e "----------------  ----------------  ----------------"
 echo -e "$(printf %11s "$LN_LOCAL_BALANCE") sats  $(printf %11s "$LN_REMOTE_BALANCE") sats  $(printf %11s $LN_TOTAL_BALANCE) sats"
-echo -e "$(printf %11s "$LN_LOCAL_BALANCE_BTC") BTC   $(printf %11s "$LN_REMOTE_BALANCE_BTC") BTC   $(printf %11s "$LN_TOTAL_BALANCE_BTC") BTC"
-echo -e "$(printf %11s $LN_LOCAL_BALANCE_PERCENTAGE) %     $(printf %11s $LN_REMOTE_BALANCE_PERCENTAGE) %     $(printf %11s $TOTAL_BALANCE_PERCENTAGE) %"
+if [ $LN_TOTAL_BALANCE -ne 0 ]; then
+    echo -e "$(printf %11s "$LN_LOCAL_BALANCE_BTC") BTC   $(printf %11s "$LN_REMOTE_BALANCE_BTC") BTC   $(printf %11s "$LN_TOTAL_BALANCE_BTC") BTC"
+    echo -e "$(printf %11s $LN_LOCAL_BALANCE_PERCENTAGE) %     $(printf %11s $LN_REMOTE_BALANCE_PERCENTAGE) %     $(printf %11s $TOTAL_BALANCE_PERCENTAGE) %"
+fi
 
 echo -e "\n${YELLOW}ON-CHAIN BALANCE${RESET}"
 echo -e "CONFIRMED         UNCONFIRMED       TOTAL           "
 echo -e "----------------  ----------------  ----------------"
 echo -e "$(printf %11s "$ONCHAIN_FUNDS_CONFIRMED") sats  $(printf %11s "$ONCHAIN_FUNDS_UNCONFIRMED") sats  $(printf %11s "$ONCHAIN_FUNDS_TOTAL") sats"
-echo -e "$(printf %11s "$ONCHAIN_FUNDS_CONFIRMED_BTC") BTC   $(printf %11s "$ONCHAIN_FUNDS_UNCONFIRMED_BTC") BTC   $(printf %11s "$ONCHAIN_FUNDS_TOTAL_BTC") BTC"
-echo -e "$(printf %11s $ONCHAIN_FUNDS_CONFIRMED_PERCENTAGE) %     $(printf %11s $ONCHAIN_FUNDS_UNCONFIRMED_PERCENTAGE) %     $(printf %11s $TOTAL_BALANCE_PERCENTAGE) %"
+if [ $ONCHAIN_FUNDS_TOTAL -ne 0 ]; then
+    echo -e "$(printf %11s "$ONCHAIN_FUNDS_CONFIRMED_BTC") BTC   $(printf %11s "$ONCHAIN_FUNDS_UNCONFIRMED_BTC") BTC   $(printf %11s "$ONCHAIN_FUNDS_TOTAL_BTC") BTC"
+    echo -e "$(printf %11s $ONCHAIN_FUNDS_CONFIRMED_PERCENTAGE) %     $(printf %11s $ONCHAIN_FUNDS_UNCONFIRMED_PERCENTAGE) %     $(printf %11s $TOTAL_BALANCE_PERCENTAGE) %"
+fi
 
 echo -e "\n${YELLOW}OWNED BALANCE [LN + ON-CHAIN]${RESET}"
 echo -e "$(printf %11s "$TOTAL_BALANCE") sats"
